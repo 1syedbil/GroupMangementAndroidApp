@@ -4,6 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/backButton"
+        android:layout_width="100dp"
+        android:layout_height="53dp"
+        android:layout_marginVertical="5dp"
+        android:layout_marginHorizontal="5dp"
+        android:text="Back"
+        android:textSize="15sp" />
+
+
     <TextView
         android:id="@+id/roleLabel"
         android:layout_width="wrap_content"
@@ -34,6 +44,6 @@
     <FrameLayout
         android:id="@+id/managerLogin"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
