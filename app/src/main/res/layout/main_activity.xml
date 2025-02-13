@@ -4,4 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/roleLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Your Role:"
+        android:textColor="@color/teal_700"
+        android:textSize="20sp"
+        android:layout_gravity="center"
+        android:layout_marginVertical="300dp"/>
+
+    <Button
+        android:id="@+id/managerButton"
+        android:layout_width="147dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="-300dp"
+        android:text="Manager"
+        android:textSize="20sp"/>
+
+    <Button
+        android:id="@+id/crewButton"
+        android:layout_width="147dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Crew"
+        android:textSize="20sp"/>
+
+    <FrameLayout
+        android:id="@+id/managerLogin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
 </LinearLayout>
