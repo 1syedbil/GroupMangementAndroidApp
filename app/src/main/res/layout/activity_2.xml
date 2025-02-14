@@ -1,13 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/backButton"
+        android:layout_width="113dp"
+        android:layout_height="41dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginHorizontal="5dp"
+        android:layout_marginVertical="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="292dp"
+        android:text="Back"
+        android:textSize="15sp" />
+
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
+        android:id="@+id/title"
+        android:layout_width="181dp"
+        android:layout_height="49dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="222dp"
+        android:gravity="center"
+        android:text="Create a task"
+        android:textAllCaps="true"
+        android:textColor="@color/teal_700"
+        android:textSize="25sp" />
+
+    <TextView
+        android:id="@+id/employeeSelectLabel"
+        android:layout_width="119dp"
         android:layout_height="wrap_content"
-        android:text="Helloooo"
-        android:textColor="#040404" />
-</LinearLayout>
+        android:layout_below="@+id/title"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="281dp"
+        android:gravity="start"
+        android:text="Select Employee:"
+        android:textColor="@color/black"
+        android:textSize="15sp" />
+
+    <Spinner
+        android:id="@+id/employeeSelect"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="170dp"
+        android:layout_marginTop="142dp"
+        android:layout_marginEnd="81dp" />
+
+    <TextView
+        android:id="@+id/dateSelectLabel"
+        android:layout_width="132dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="184dp"
+        android:layout_marginEnd="269dp"
+        android:text="Select an Expected Completion Date:"
+        android:textColor="@color/black"
+        android:textSize="15sp" />
+
+    <CalendarView
+        android:layout_width="217dp"
+        android:layout_height="301dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="164dp"
+        android:layout_marginEnd="44dp" />
+
+    <TextView
+        android:id="@+id/taskDescLabel"
+        android:layout_width="132dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="536dp"
+        android:layout_marginEnd="269dp"
+        android:text="Enter a Description for the Task:"
+        android:textColor="@color/black"
+        android:textSize="15sp" />
+
+    <EditText
+        android:id="@+id/taskDesc"
+        android:layout_width="217dp"
+        android:layout_height="86dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="491dp"
+        android:layout_marginEnd="45dp" />
+
+    <TextView
+        android:id="@+id/wordCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/taskDesc"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="3dp"
+        android:layout_marginEnd="177dp"
+        android:text="50 words left" />
+
+    <Button
+        android:id="@+id/assignTaskButton"
+        android:layout_width="132dp"
+        android:layout_height="59dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="661dp"
+        android:layout_marginEnd="273dp"
+        android:text="Assign Task" />
+
+    <Button
+        android:id="@+id/viewTskProgButton"
+        android:layout_width="205dp"
+        android:layout_height="41dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="201dp"
+        android:layout_marginTop="5dp"
+        android:text="View Task Progress" />
+
+</RelativeLayout>

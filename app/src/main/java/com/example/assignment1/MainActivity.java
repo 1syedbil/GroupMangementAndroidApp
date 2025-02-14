@@ -38,15 +38,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        crewBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View V) {
-                getSupportFragmentManager().beginTransaction().remove(login).commit();
-
-                roleLabel.setVisibility(View.VISIBLE);
-                managerBtn.setVisibility(View.VISIBLE);
-                crewBtn.setVisibility(View.VISIBLE);
-                backBtn.setVisibility(View.GONE);
+                backToHome(managerBtn, crewBtn, backBtn, roleLabel, login);
             }
         });
 
@@ -65,6 +67,15 @@ public class MainActivity extends AppCompatActivity {
 
         return login;
 
+    }
+
+    private void backToHome(Button managerBtn, Button crewBtn, Button backBtn, TextView roleLabel, ManagerLogin login){
+        getSupportFragmentManager().beginTransaction().remove(login).commit();
+
+        roleLabel.setVisibility(View.VISIBLE);
+        managerBtn.setVisibility(View.VISIBLE);
+        crewBtn.setVisibility(View.VISIBLE);
+        backBtn.setVisibility(View.GONE);
     }
 
 }
