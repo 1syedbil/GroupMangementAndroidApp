@@ -1,22 +1,28 @@
 package com.example.assignment1;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class SecondActivity extends ComponentActivity {
 
@@ -26,6 +32,9 @@ public class SecondActivity extends ComponentActivity {
     private Button backBtn;
     private Button assignTaskBtn;
     private Button viewTskProgBtn;
+    private CalendarView calendarView;
+    private String selectedDate;
+    private final DataBaseHelper dbHelper = new DataBaseHelper(this);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,7 +42,12 @@ public class SecondActivity extends ComponentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_2);
 
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        selectedDate = dateFormat.format(calendar.getTime());
+
         employeeSelect = findViewById(R.id.employeeSelect);
+        calendarView = findViewById(R.id.dateSelect);
         taskDesc = findViewById(R.id.taskDesc);
         wordCount = findViewById(R.id.wordCount);
         backBtn = findViewById(R.id.backButton);
@@ -73,7 +87,46 @@ public class SecondActivity extends ComponentActivity {
         assignTaskBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View V) {
+                if (employeeSelect.getSelectedItem().toString().equals("--Empty--") || taskDesc.getText().toString().isEmpty())
+                {
+                    Toast.makeText(SecondActivity.this, "Invalid inputs. Task could not be assigned.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                for (int i = 0; i < taskDesc.getText().toString().length(); i++)
+                {
+                    char curChar = taskDesc.getText().toString().charAt(i);
+                    char[] specialChars = {'\'', '"', '\\', ';'};
+
+                    for (char c : specialChars)
+                    {
+                        if (curChar == c)
+                        {
+                            Toast.makeText(SecondActivity.this, "Invalid inputs. Task could not be assigned.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+                }
+
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+                dbHelper.addTask(db, employeeSelect.getSelectedItem().toString(), selectedDate, taskDesc.getText().toString());
+
+                db.close();
+
                 Toast.makeText(SecondActivity.this, "Task successfully assigned!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                // Handle the selected date
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year, month, dayOfMonth);
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                selectedDate = dateFormat.format(calendar.getTime());
             }
         });
 

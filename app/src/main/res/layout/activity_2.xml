@@ -70,6 +70,7 @@
         android:textSize="15sp" />
 
     <CalendarView
+        android:id="@+id/dateSelect"
         android:layout_width="217dp"
         android:layout_height="301dp"
         android:layout_alignParentTop="true"
