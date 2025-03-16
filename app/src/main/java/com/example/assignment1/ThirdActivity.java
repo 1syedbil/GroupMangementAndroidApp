@@ -1,6 +1,7 @@
 package com.example.assignment1;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
@@ -29,6 +30,7 @@ public class ThirdActivity extends ComponentActivity {
     private ListView employee2TskList;
     private ListView employee3TskList;
     private final DataBaseHelper dbHelper = new DataBaseHelper(this);
+    private List<String> tasks;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,27 +44,6 @@ public class ThirdActivity extends ComponentActivity {
         employee2TskList = findViewById(R.id.employee2TaskList);
         employee3TskList = findViewById(R.id.employee3TaskList);
 
-//        ArrayList<String> sampleTaskList1 = new ArrayList<>();
-//        sampleTaskList1.add("Employee 1 Task 1");
-//        sampleTaskList1.add("Employee 1 Task 2");
-//        ArrayList<String> sampleTaskList2 = new ArrayList<>();
-//        sampleTaskList2.add("Employee 2 Task 1");
-//        sampleTaskList2.add("Employee 2 Task 2");
-//        ArrayList<String> sampleTaskList3 = new ArrayList<>();
-//        sampleTaskList3.add("Employee 3 Task 1");
-//        sampleTaskList3.add("Employee 3 Task 2");
-//
-//        ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sampleTaskList1);
-//        employee1TskList.setAdapter(adapter1);
-//        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sampleTaskList2);
-//        employee2TskList.setAdapter(adapter2);
-//        ArrayAdapter<String> adapter3 = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, sampleTaskList3);
-//        employee3TskList.setAdapter(adapter3);
-//
-        employee1TskList.setVisibility(View.GONE);
-        employee2TskList.setVisibility(View.GONE);
-        employee3TskList.setVisibility(View.GONE);
-
         List<String> employees = new ArrayList<>();
         employees.add("--Empty--");
         employees.add("Employee 1");
@@ -72,6 +53,12 @@ public class ThirdActivity extends ComponentActivity {
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, employees);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         employeeSelect.setAdapter(spinnerAdapter);
+
+        // Check if the spinner should be reset
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("RESET_SPINNER", false)) {
+            employeeSelect.setSelection(0); // Reset spinner to "--Empty--"
+        }
 
         // Handle Spinner selection
         employeeSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -90,7 +77,7 @@ public class ThirdActivity extends ComponentActivity {
                 } else {
                     // Query the database for tasks assigned to the selected employee
                     SQLiteDatabase db = dbHelper.getReadableDatabase();
-                    List<String> tasks = dbHelper.getTasksForEmployee(db, selectedEmployee);
+                    tasks = dbHelper.getTasksForEmployee(db, selectedEmployee);
 
                     // Populate the correct ListView based on the selected employee
                     ArrayAdapter<String> taskAdapter = new ArrayAdapter<>(ThirdActivity.this, android.R.layout.simple_list_item_1, tasks);
@@ -126,6 +113,69 @@ public class ThirdActivity extends ComponentActivity {
                 Intent intent = new Intent(ThirdActivity.this, SecondActivity.class);
 
                 startActivity(intent);
+            }
+        });
+
+        employee1TskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected task ID from the database
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor cursor = db.rawQuery("SELECT " + DataBaseHelper.TASK_ID + " FROM " + DataBaseHelper.TABLE_NAME + " WHERE " + DataBaseHelper.EMPLOYEE + " = ?", new String[]{"Employee 1"});
+
+                if (cursor.moveToPosition(position)) {
+                    int taskId = cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseHelper.TASK_ID));
+
+                    // Start TaskDetailActivity with the task ID
+                    Intent intent = new Intent(ThirdActivity.this, TaskDetailActivity.class);
+                    intent.putExtra("TASK_ID", taskId);
+                    startActivity(intent);
+                }
+
+                cursor.close();
+                db.close();
+            }
+        });
+
+        employee2TskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected task ID from the database
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor cursor = db.rawQuery("SELECT " + DataBaseHelper.TASK_ID + " FROM " + DataBaseHelper.TABLE_NAME + " WHERE " + DataBaseHelper.EMPLOYEE + " = ?", new String[]{"Employee 2"});
+
+                if (cursor.moveToPosition(position)) {
+                    int taskId = cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseHelper.TASK_ID));
+
+                    // Start TaskDetailActivity with the task ID
+                    Intent intent = new Intent(ThirdActivity.this, TaskDetailActivity.class);
+                    intent.putExtra("TASK_ID", taskId);
+                    startActivity(intent);
+                }
+
+                cursor.close();
+                db.close();
+            }
+        });
+
+        employee3TskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected task ID from the database
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor cursor = db.rawQuery("SELECT " + DataBaseHelper.TASK_ID + " FROM " + DataBaseHelper.TABLE_NAME + " WHERE " + DataBaseHelper.EMPLOYEE + " = ?", new String[]{"Employee 3"});
+
+                if (cursor.moveToPosition(position)) {
+                    int taskId = cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseHelper.TASK_ID));
+
+                    // Start TaskDetailActivity with the task ID
+                    Intent intent = new Intent(ThirdActivity.this, TaskDetailActivity.class);
+                    intent.putExtra("TASK_ID", taskId);
+                    startActivity(intent);
+                }
+
+                cursor.close();
+                db.close();
             }
         });
 
