@@ -18,6 +18,12 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
+import com.example.assignment1.data.TaskContract;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
@@ -90,9 +96,27 @@ public class ThirdActivity extends ComponentActivity {
                     // Do nothing if no employee is selected
                     Toast.makeText(ThirdActivity.this, "Please select an employee.", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Query the database for tasks assigned to the selected employee
-                    SQLiteDatabase db = dbHelper.getReadableDatabase();
-                    tasks = dbHelper.getTasksForEmployee(db, selectedEmployee);
+                    String[] projection = {
+                            TaskContract.TaskEntry.COLUMN_DESCRIPTION
+                    };
+                    String selection = TaskContract.TaskEntry.COLUMN_EMPLOYEE + "=?";
+                    String[] selectionArgs = { selectedEmployee };
+
+                    Cursor cursor = getContentResolver().query(
+                            TaskContract.TaskEntry.CONTENT_URI,
+                            projection,
+                            selection,
+                            selectionArgs,
+                            null
+                    );
+
+                    tasks = new ArrayList<>();
+                    if (cursor != null) {
+                        while (cursor.moveToNext()) {
+                            tasks.add(cursor.getString(0));
+                        }
+                        cursor.close();
+                    }
 
                     // Populate the correct ListView based on the selected employee
                     ArrayAdapter<String> taskAdapter = new ArrayAdapter<>(ThirdActivity.this, android.R.layout.simple_list_item_1, tasks);
@@ -111,8 +135,6 @@ public class ThirdActivity extends ComponentActivity {
                             employee3TskList.setVisibility(View.VISIBLE);
                             break;
                     }
-
-                    db.close();
                 }
             }
 
@@ -134,63 +156,21 @@ public class ThirdActivity extends ComponentActivity {
         employee1TskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get the selected task ID from the database
-                SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor cursor = db.rawQuery("SELECT " + DataBaseHelper.TASK_ID + " FROM " + DataBaseHelper.TABLE_NAME + " WHERE " + DataBaseHelper.EMPLOYEE + " = ?", new String[]{"Employee 1"});
-
-                if (cursor.moveToPosition(position)) {
-                    int taskId = cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseHelper.TASK_ID));
-
-                    // Start TaskDetailActivity with the task ID
-                    Intent intent = new Intent(ThirdActivity.this, TaskDetailActivity.class);
-                    intent.putExtra("TASK_ID", taskId);
-                    startActivity(intent);
-                }
-
-                cursor.close();
-                db.close();
+                queryAndLaunchTaskDetail("Employee 1", position);
             }
         });
 
         employee2TskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get the selected task ID from the database
-                SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor cursor = db.rawQuery("SELECT " + DataBaseHelper.TASK_ID + " FROM " + DataBaseHelper.TABLE_NAME + " WHERE " + DataBaseHelper.EMPLOYEE + " = ?", new String[]{"Employee 2"});
-
-                if (cursor.moveToPosition(position)) {
-                    int taskId = cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseHelper.TASK_ID));
-
-                    // Start TaskDetailActivity with the task ID
-                    Intent intent = new Intent(ThirdActivity.this, TaskDetailActivity.class);
-                    intent.putExtra("TASK_ID", taskId);
-                    startActivity(intent);
-                }
-
-                cursor.close();
-                db.close();
+                queryAndLaunchTaskDetail("Employee 2", position);
             }
         });
 
         employee3TskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get the selected task ID from the database
-                SQLiteDatabase db = dbHelper.getReadableDatabase();
-                Cursor cursor = db.rawQuery("SELECT " + DataBaseHelper.TASK_ID + " FROM " + DataBaseHelper.TABLE_NAME + " WHERE " + DataBaseHelper.EMPLOYEE + " = ?", new String[]{"Employee 3"});
-
-                if (cursor.moveToPosition(position)) {
-                    int taskId = cursor.getInt(cursor.getColumnIndexOrThrow(DataBaseHelper.TASK_ID));
-
-                    // Start TaskDetailActivity with the task ID
-                    Intent intent = new Intent(ThirdActivity.this, TaskDetailActivity.class);
-                    intent.putExtra("TASK_ID", taskId);
-                    startActivity(intent);
-                }
-
-                cursor.close();
-                db.close();
+                queryAndLaunchTaskDetail("Employee 3", position);
             }
         });
 
@@ -207,6 +187,28 @@ public class ThirdActivity extends ComponentActivity {
             }
         });
 
+    }
+
+    private void queryAndLaunchTaskDetail(String employeeName, int position) {
+        String[] projection = { TaskContract.TaskEntry.COLUMN_TASK_ID };
+        String selection = TaskContract.TaskEntry.COLUMN_EMPLOYEE + "=?";
+        String[] selectionArgs = { employeeName };
+        String sortOrder = TaskContract.TaskEntry.COLUMN_TASK_ID + " ASC";
+
+        try (Cursor cursor = getContentResolver().query(
+                TaskContract.TaskEntry.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder
+        )) {
+            if (cursor != null && cursor.moveToPosition(position)) {
+                int taskId = cursor.getInt(cursor.getColumnIndexOrThrow(TaskContract.TaskEntry.COLUMN_TASK_ID));
+                Intent intent = new Intent(ThirdActivity.this, TaskDetailActivity.class);
+                intent.putExtra("TASK_ID", taskId);
+                startActivity(intent);
+            }
+        }
     }
 
     private void showEmailInputDialog() {

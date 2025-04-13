@@ -14,6 +14,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
+import com.example.assignment1.data.TaskContract;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
@@ -113,25 +119,27 @@ public class SecondActivity extends ComponentActivity {
                     }
                 }
 
-                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                ContentValues values = new ContentValues();
+                values.put(TaskContract.TaskEntry.COLUMN_EMPLOYEE, employeeSelect.getSelectedItem().toString());
+                values.put(TaskContract.TaskEntry.COLUMN_DATE, selectedDate);
+                values.put(TaskContract.TaskEntry.COLUMN_DESCRIPTION, taskDesc.getText().toString());
 
-                dbHelper.addTask(db, employeeSelect.getSelectedItem().toString(), selectedDate, taskDesc.getText().toString());
+                Uri uri = getContentResolver().insert(TaskContract.TaskEntry.CONTENT_URI, values);
+                if (uri != null) {
+                    // Start notification service
+                    Intent serviceIntent = new Intent(SecondActivity.this, TaskNotificationService.class);
+                    serviceIntent.putExtra("task_assigned", true);
+                    serviceIntent.putExtra("employee", employeeSelect.getSelectedItem().toString());
+                    serviceIntent.putExtra("task_description", taskDesc.getText().toString());
 
-                db.close();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(serviceIntent);
+                    } else {
+                        startService(serviceIntent);
+                    }
 
-                // Start the notification service
-                Intent serviceIntent = new Intent(SecondActivity.this, TaskNotificationService.class);
-                serviceIntent.putExtra("task_assigned", true);
-                serviceIntent.putExtra("employee", employeeSelect.getSelectedItem().toString());
-                serviceIntent.putExtra("task_description", taskDesc.getText().toString());
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(serviceIntent);
-                } else {
-                    startService(serviceIntent);
+                    Toast.makeText(SecondActivity.this, "Task successfully assigned!", Toast.LENGTH_SHORT).show();
                 }
-
-                Toast.makeText(SecondActivity.this, "Task successfully assigned!", Toast.LENGTH_SHORT).show();
             }
         });
 

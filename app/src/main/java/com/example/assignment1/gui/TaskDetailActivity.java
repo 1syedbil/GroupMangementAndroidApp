@@ -9,6 +9,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
+import com.example.assignment1.data.TaskContract;
 
 import androidx.activity.ComponentActivity;
 
@@ -72,34 +78,48 @@ public class TaskDetailActivity extends ComponentActivity {
     }
 
     private void loadTaskDetails() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + DataBaseHelper.TABLE_NAME + " WHERE " + DataBaseHelper.TASK_ID + " = ?", new String[]{String.valueOf(taskId)});
+        String[] projection = {
+                TaskContract.TaskEntry.COLUMN_DESCRIPTION,
+                TaskContract.TaskEntry.COLUMN_EMPLOYEE,
+                TaskContract.TaskEntry.COLUMN_DATE
+        };
 
-        if (cursor.moveToFirst()) {
-            String description = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseHelper.DESCRIPTION));
-            String employee = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseHelper.EMPLOYEE));
-            String date = cursor.getString(cursor.getColumnIndexOrThrow(DataBaseHelper.DATE));
+        Uri taskUri = ContentUris.withAppendedId(TaskContract.TaskEntry.CONTENT_URI, taskId);
+
+        Cursor cursor = getContentResolver().query(
+                taskUri,
+                projection,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String description = cursor.getString(cursor.getColumnIndexOrThrow(
+                    TaskContract.TaskEntry.COLUMN_DESCRIPTION));
+            String employee = cursor.getString(cursor.getColumnIndexOrThrow(
+                    TaskContract.TaskEntry.COLUMN_EMPLOYEE));
+            String date = cursor.getString(cursor.getColumnIndexOrThrow(
+                    TaskContract.TaskEntry.COLUMN_DATE));
 
             taskDescription.setText(description);
             taskEmployee.setText("Assigned to: " + employee);
             taskDate.setText("Due Date: " + date);
-        }
 
-        cursor.close();
-        db.close();
+            cursor.close();
+        }
     }
 
     private void deleteTask() {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(DataBaseHelper.TABLE_NAME, DataBaseHelper.TASK_ID + " = ?", new String[]{String.valueOf(taskId)});
-        db.close();
+        Uri taskUri = ContentUris.withAppendedId(TaskContract.TaskEntry.CONTENT_URI, taskId);
+        int rowsDeleted = getContentResolver().delete(taskUri, null, null);
 
-        Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
-
-        // Return to ThirdActivity and reset the spinner to "--Empty--"
-        Intent intent = new Intent(TaskDetailActivity.this, ThirdActivity.class);
-        intent.putExtra("RESET_SPINNER", true); // Add a flag to reset the spinner
-        startActivity(intent);
-        finish(); // Close the current activity
+        if (rowsDeleted > 0) {
+            Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(TaskDetailActivity.this, ThirdActivity.class);
+            intent.putExtra("RESET_SPINNER", true);
+            startActivity(intent);
+            finish();
+        }
     }
 }

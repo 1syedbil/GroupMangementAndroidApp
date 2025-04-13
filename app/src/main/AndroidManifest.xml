@@ -44,6 +44,12 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <provider
+            android:name=".data.TaskContentProvider"
+            android:authorities="com.example.assignment1.provider"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
         <service android:name=".services.TaskNotificationService" />
     </application>
 </manifest>

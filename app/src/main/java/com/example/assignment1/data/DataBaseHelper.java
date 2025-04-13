@@ -11,11 +11,11 @@ import java.util.List;
 public class DataBaseHelper extends SQLiteOpenHelper {
     public static final String DB_NAME = "mgmt_app.db";
     public static final int DB_VERSION = 1;
-    public static final String TABLE_NAME = "employee_tasks";
-    public static final String TASK_ID = "task_id";
-    public static final String EMPLOYEE = "employee";
-    public static final String DATE = "due_date";
-    public static final String DESCRIPTION = "task_description";
+    public static final String TABLE_NAME = TaskContract.TaskEntry.TABLE_NAME;
+    public static final String TASK_ID = TaskContract.TaskEntry.COLUMN_TASK_ID;
+    public static final String EMPLOYEE = TaskContract.TaskEntry.COLUMN_EMPLOYEE;
+    public static final String DATE = TaskContract.TaskEntry.COLUMN_DATE;
+    public static final String DESCRIPTION = TaskContract.TaskEntry.COLUMN_DESCRIPTION;
     public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
             + TASK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + EMPLOYEE +
             " TEXT NOT NULL, " + DATE + " TEXT NOT NULL, " + DESCRIPTION +
