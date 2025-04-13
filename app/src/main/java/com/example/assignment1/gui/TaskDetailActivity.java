@@ -1,4 +1,4 @@
-package com.example.assignment1;
+package com.example.assignment1.gui;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -11,6 +11,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
+
+import com.example.assignment1.R;
+import com.example.assignment1.data.DataBaseHelper;
 
 public class TaskDetailActivity extends ComponentActivity {
 

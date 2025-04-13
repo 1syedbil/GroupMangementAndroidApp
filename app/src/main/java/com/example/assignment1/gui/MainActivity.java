@@ -1,15 +1,21 @@
-package com.example.assignment1;
+package com.example.assignment1.gui;
 
-import android.database.sqlite.SQLiteDatabase;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.Manifest;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentManager;
+
+import com.example.assignment1.background.ChainedAsyncTask;
+import com.example.assignment1.R;
+import com.example.assignment1.services.TaskNotificationService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +29,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
         setContentView(R.layout.main_activity);
+
+        new ChainedAsyncTask(this).execute();
 
         managerBtn = findViewById(R.id.managerButton);
         crewBtn = findViewById(R.id.crewButton);
@@ -53,6 +68,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPendingNotifications();
+    }
+
+    private void checkPendingNotifications() {
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.cancel(TaskNotificationService.NOTIFICATION_ID);
     }
 
     private ManagerLogin showManagerLogin(Button managerBtn, Button crewBtn, Button backBtn, TextView roleLabel){

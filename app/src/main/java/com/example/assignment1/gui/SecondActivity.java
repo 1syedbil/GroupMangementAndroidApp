@@ -1,7 +1,8 @@
-package com.example.assignment1;
+package com.example.assignment1.gui;
 
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,6 +18,10 @@ import android.widget.Toast;
 import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.assignment1.data.DataBaseHelper;
+import com.example.assignment1.R;
+import com.example.assignment1.services.TaskNotificationService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -113,6 +118,18 @@ public class SecondActivity extends ComponentActivity {
                 dbHelper.addTask(db, employeeSelect.getSelectedItem().toString(), selectedDate, taskDesc.getText().toString());
 
                 db.close();
+
+                // Start the notification service
+                Intent serviceIntent = new Intent(SecondActivity.this, TaskNotificationService.class);
+                serviceIntent.putExtra("task_assigned", true);
+                serviceIntent.putExtra("employee", employeeSelect.getSelectedItem().toString());
+                serviceIntent.putExtra("task_description", taskDesc.getText().toString());
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
+                } else {
+                    startService(serviceIntent);
+                }
 
                 Toast.makeText(SecondActivity.this, "Task successfully assigned!", Toast.LENGTH_SHORT).show();
             }

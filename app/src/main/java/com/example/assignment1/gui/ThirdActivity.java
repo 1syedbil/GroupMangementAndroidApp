@@ -1,5 +1,11 @@
-package com.example.assignment1;
+package com.example.assignment1.gui;
 
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.Settings;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -8,8 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -17,20 +22,27 @@ import android.widget.Toast;
 import androidx.activity.ComponentActivity;
 import androidx.annotation.Nullable;
 
+import com.example.assignment1.data.DataBaseHelper;
+import com.example.assignment1.utils.EmailSender;
+import com.example.assignment1.utils.FileHandler;
+import com.example.assignment1.R;
+
+import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ThirdActivity extends ComponentActivity {
 
     private Button backBtn;
+    private Button exportTaskListButton;
     private Spinner employeeSelect;
     private ListView employee1TskList;
     private ListView employee2TskList;
     private ListView employee3TskList;
     private final DataBaseHelper dbHelper = new DataBaseHelper(this);
     private List<String> tasks;
+    private String selectedEmployee;
+    private static final int REQUEST_CODE_MANAGE_EXTERNAL_STORAGE = 2;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +50,10 @@ public class ThirdActivity extends ComponentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_3);
 
+        requestManageExternalStoragePermission();
+
         backBtn = findViewById(R.id.backButton);
+        exportTaskListButton = findViewById(R.id.exportTaskListButton);
         employeeSelect = findViewById(R.id.employeeSelect);
         employee1TskList = findViewById(R.id.employee1TaskList);
         employee2TskList = findViewById(R.id.employee2TaskList);
@@ -64,7 +79,7 @@ public class ThirdActivity extends ComponentActivity {
         employeeSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedEmployee = employees.get(position);
+                selectedEmployee = employees.get(position);
 
                 // Hide all ListViews initially
                 employee1TskList.setVisibility(View.GONE);
@@ -179,6 +194,98 @@ public class ThirdActivity extends ComponentActivity {
             }
         });
 
+        exportTaskListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (tasks == null || tasks.isEmpty()) {
+                    Toast.makeText(ThirdActivity.this, "No tasks to export", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Prompt the user to enter their email
+                showEmailInputDialog();
+            }
+        });
+
     }
 
+    private void showEmailInputDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter Your Email");
+
+        // Set up the input
+        final EditText input = new EditText(this);
+        input.setHint("example@example.com");
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String email = input.getText().toString().trim();
+                if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    Toast.makeText(ThirdActivity.this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Check permissions before creating the file
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (Environment.isExternalStorageManager()) {
+                        // Permission granted, proceed with file operations
+                        File file = FileHandler.createCSVFile(ThirdActivity.this, tasks, selectedEmployee);
+
+                        if (file != null) {
+                            // Send the CSV file via email
+                            EmailSender.sendEmail(ThirdActivity.this, email, file);
+                        } else {
+                            Toast.makeText(ThirdActivity.this, "Failed to create CSV file", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Permission not granted, request it
+                        requestManageExternalStoragePermission();
+                    }
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void requestManageExternalStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                // Request the MANAGE_EXTERNAL_STORAGE permission
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                intent.setData(uri);
+                startActivityForResult(intent, REQUEST_CODE_MANAGE_EXTERNAL_STORAGE);
+            } else {
+                // Permission already granted
+                Toast.makeText(this, "Manage external storage permission granted", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_MANAGE_EXTERNAL_STORAGE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    // Permission granted
+                    Toast.makeText(this, "Manage external storage permission granted", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Permission denied
+                    Toast.makeText(this, "Manage external storage permission denied", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
 }
