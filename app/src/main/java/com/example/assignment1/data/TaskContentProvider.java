@@ -54,6 +54,7 @@ public class TaskContentProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
+        // Set notification URI for cursor
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
@@ -82,9 +83,13 @@ public class TaskContentProvider extends ContentProvider {
         }
 
         id = db.insert(DataBaseHelper.TABLE_NAME, null, values);
-        getContext().getContentResolver().notifyChange(uri, null);
+        Uri newUri = Uri.withAppendedPath(CONTENT_URI, String.valueOf(id));
 
-        return Uri.withAppendedPath(CONTENT_URI, String.valueOf(id));
+        // Notify of change after successful insertion
+        getContext().getContentResolver().notifyChange(newUri, null);
+        getContext().getContentResolver().notifyChange(CONTENT_URI, null); // Also notify parent URI
+
+        return newUri;
     }
 
     @Override
@@ -106,7 +111,12 @@ public class TaskContentProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        // Notify of change after successful deletion
+        if (count > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+            getContext().getContentResolver().notifyChange(CONTENT_URI, null); // Also notify parent URI
+        }
+
         return count;
     }
 
@@ -129,7 +139,12 @@ public class TaskContentProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        // Notify of change after successful update
+        if (count > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+            getContext().getContentResolver().notifyChange(CONTENT_URI, null); // Also notify parent URI
+        }
+
         return count;
     }
 }
